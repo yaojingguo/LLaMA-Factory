@@ -1,7 +1,7 @@
 ### model
 model_name_or_path: Qwen/Qwen2.5-VL-7B-Instruct
-image_max_pixels: 262144
-video_max_pixels: 16384
+image_max_pixels: 12845056 # 16384 * 28 * 28, original value: 262144
+video_max_pixels: 602112 # 768 * 28 * 28, original value: 16384
 trust_remote_code: true
 
 ### method
@@ -9,44 +9,47 @@ stage: sft
 do_train: true
 finetuning_type: full
 freeze_vision_tower: true
-freeze_multi_modal_projector: true
+freeze_multi_modal_projector: false # original value: true
 freeze_language_model: false
-deepspeed: examples/deepspeed/ds_z3_config.json
+deepspeed: examples/deepspeed/ds_z2_config.json # original value: examples/deepspeed/ds_z3_config.json
 
 ### dataset
 # dataset: mllm_demo
 # dataset: mllm_demo,identity,alpaca_en_demo
 dataset: qwen_sft_train
 template: qwen2_vl
-cutoff_len: 2048
-max_samples: 1000
+cutoff_len: 8192
+# original value: max_samples: 1000
 overwrite_cache: true
-preprocessing_num_workers: 16
-dataloader_num_workers: 4
+preprocessing_num_workers: 8 # original value: 16
+dataloader_num_workers: 8 # original value: 4
 
 ### output
 output_dir: saves/qwen2_5vl-7b/full/sft
-logging_steps: 10
-save_steps: 500
+logging_steps: 5 # orignal value: 10
+save_steps: 50 # original value: 500
+save_total_limit: 5 # orginal missing
 plot_loss: true
 overwrite_output_dir: true
-save_only_model: false
+save_only_model: true # original value: false
 report_to: wandb  # choices: [none, wandb, tensorboard, swanlab, mlflow]
 
 ### train
-per_device_train_batch_size: 1
+per_device_train_batch_size: 2 # orignal value: 1
 gradient_accumulation_steps: 2
 learning_rate: 1.0e-5
+# use 5.0
 num_train_epochs: 1.0
-# num_train_epochs: 3.0
 lr_scheduler_type: cosine
-warmup_ratio: 0.1
+warmup_ratio: 0.05 # original value: 0.1
 bf16: true
 ddp_timeout: 180000000
 resume_from_checkpoint: null
+enable_liger_kernel: true # original missing
+gradient_checkpointing_kwargs: '{"use_reentrant": false}'
 
 ### eval
 eval_dataset: qwen_sft_test
-per_device_eval_batch_size: 1
+per_device_eval_batch_size: 2 # original value: 1
 eval_strategy: steps
-eval_steps: 500
+eval_steps: 50 # orignal value: 500
